@@ -7,6 +7,9 @@ const MOCK_HEROES_CADASTRAR = { nome: 'Gavião Negro', poder: 'Flexas' }
 
 describe('Postgres Strategy', function () {
   this.timeout(Infinity);
+  this.beforeAll(async () => {
+    await context.connect();
+  })
 
   it('Postgres SQL Connection', async () => {
     const result = await context.isConnected();
@@ -15,7 +18,7 @@ describe('Postgres Strategy', function () {
 
   it('cadastrar', async () => {
     const result = await context.create(MOCK_HEROES_CADASTRAR);
-
+    delete result.id;
     assert.deepEqual(result, MOCK_HEROES_CADASTRAR);
   });
 });
