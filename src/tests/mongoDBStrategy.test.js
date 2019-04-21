@@ -14,10 +14,19 @@ const MOCK_HEROES_DEFAULT = {
   poder: 'Super teia'
 }
 
+const MOCK_HEROES_ATUALIZAR = {
+  nome: `Patolino-${Date.now()}`,
+  poder: 'Velocidade'
+}
+
+let MOCK_HEROES_ID = '';
+
 describe('MongoDB Suite de testes', function () {
   this.beforeAll(async () => {
     await context.connect();
     await context.create(MOCK_HEROES_DEFAULT);
+    const result = await context.create(MOCK_HEROES_ATUALIZAR);
+    MOCK_HEROES_ID = result._id;
   });
 
   it('verificar conexão', async () => {
@@ -36,5 +45,12 @@ describe('MongoDB Suite de testes', function () {
     const [{nome, poder}] = await context.read({ nome: MOCK_HEROES_DEFAULT.nome });
     const result = { nome, poder };
     assert.deepEqual(result, MOCK_HEROES_DEFAULT);
+  });
+
+  it('atualizar', async () => {
+    const result = await context.update(MOCK_HEROES_ID, {
+      nome: 'Pernalonga'
+    });
+    assert.deepEqual(result.nModified, 1);
   });
 })
