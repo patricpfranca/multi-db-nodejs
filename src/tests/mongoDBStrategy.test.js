@@ -53,4 +53,9 @@ describe('MongoDB Suite de testes', function () {
     });
     assert.deepEqual(result.nModified, 1);
   });
+
+  it('remover', async () => {
+    const result = await context.delete(MOCK_HEROES_ID);
+    assert.deepEqual(result.n, 1);
+  });
 })
