@@ -21,7 +21,7 @@ describe('Suite de testes da API Heroes', function () {
     assert.ok(Array.isArray(dados));
   });
 
-  it('listar /heroes - returnar 10 registros', async () => {
+  it('listar /heroes - retornar 3 registros', async () => {
     const TAMANHO_LIMITE = 3;
     const result = await app.inject({
       method: 'GET',
@@ -35,14 +35,17 @@ describe('Suite de testes da API Heroes', function () {
     assert.ok(dados.length === TAMANHO_LIMITE);
   });
 
-  it('listar /heroes - returnar 10 registros', async () => {
+  it('listar /heroes - retornar um erro com limit incorreto', async () => {
     const TAMANHO_LIMITE = 'AAA';
     const result = await app.inject({
       method: 'GET',
       url: `/heroes?skip=0&limit=${TAMANHO_LIMITE}`
     });
 
-    assert.deepEqual(result.payload, 'Erro interno no servidor');
+    const errorResult = {"statusCode":400,"error":"Bad Request","message":"child \"limit\" fails because [\"limit\" must be a number]","validation":{"source":"query","keys":["limit"]}};
+
+    assert.deepEqual(result.statusCode, 400);
+    assert.deepEqual(result.payload, JSON.stringify(errorResult));
   });
 
   it('listar /heroes - filtrar um item', async () => {
