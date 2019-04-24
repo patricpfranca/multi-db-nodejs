@@ -15,14 +15,19 @@ const MOCK_HEROES_DEFAULT = {
   poder: 'laço'
 }
 
+let MOCK_ID = ''
+
 describe('Suite de testes da API Heroes', function () {
   this.beforeAll(async () => {
     app = await api;
+    const result = await app.inject({
+      method: 'POST',
+      url: '/heroes',
+      payload: JSON.stringify(MOCK_HEROES_DEFAULT)
+    });
 
-    const connection = MongoDB.connect();
-    context = new Context(new MongoDB(connection, HeroesSchema));
-    
-    await context.create(MOCK_HEROES_DEFAULT);
+    const dados = JSON.parse(result.payload);
+    MOCK_ID = dados._id;
   });
 
   it('listar /heroes', async () => {
@@ -92,5 +97,17 @@ describe('Suite de testes da API Heroes', function () {
     assert.ok(statusCode === 200);
     assert.notStrictEqual(_id, undefined);
     assert.deepEqual(message, "Heroi cadastrado com sucesso");
+  });
+
+  it('atualizar PATCH /heroes/:id', async () => {
+    const _id = MOCK_ID;
+    const expected = {
+      poder: 'laço'
+    };
+    const result = await app.inject({
+      method: 'PATCH',
+      url: `/heroes/${_id}`,
+      payload: JSON.stringify(expected)
+    });
   });
 });
