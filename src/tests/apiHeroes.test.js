@@ -1,11 +1,28 @@
 const assert = require('assert');
 const api = require('./../api');
+const MongoDB = require('../db/strategies/mongodb/mongodb');
+const Context = require('../db/strategies/base/contextStrategy');
+const HeroesSchema = require('../db/strategies/mongodb/schemas/heroesSchema');
 
 let app = {};
+const MOCK_HEROES_CADASTRAR = {
+  nome: 'Chapolin Colorado',
+  poder: 'Marreta Bionica'
+};
+
+const MOCK_HEROES_DEFAULT = {
+  nome: 'Mulher Maravilha',
+  poder: 'laço'
+}
 
 describe('Suite de testes da API Heroes', function () {
   this.beforeAll(async () => {
     app = await api;
+
+    const connection = MongoDB.connect();
+    context = new Context(new MongoDB(connection, HeroesSchema));
+    
+    await context.create(MOCK_HEROES_DEFAULT);
   });
 
   it('listar /heroes', async () => {
@@ -48,8 +65,8 @@ describe('Suite de testes da API Heroes', function () {
     assert.deepEqual(result.payload, JSON.stringify(errorResult));
   });
 
-  it('listar /heroes - filtrar um item', async () => {
-    const NOME = 'Homem-Aranha-1555860707579'
+  it('listar GET /heroes - filtrar um item', async () => {
+    const NOME = MOCK_HEROES_DEFAULT.nome
     const result = await app.inject({
       method: 'GET',
       url: `/heroes?skip=0&limit=1000&nome=${NOME}`
@@ -60,5 +77,20 @@ describe('Suite de testes da API Heroes', function () {
 
     assert.deepEqual(statusCode, 200);
     assert.ok(dados[0].nome === NOME);
+  });
+
+  it('cadastrar POST /heroes', async () => {
+    const result = await app.inject({
+      method: 'POST',
+      url: `/heroes`,
+      payload: JSON.stringify(MOCK_HEROES_CADASTRAR)
+    });
+
+    const statusCode = result.statusCode;
+    const { message, _id } = JSON.parse(result.payload);
+
+    assert.ok(statusCode === 200);
+    assert.notStrictEqual(_id, undefined);
+    assert.deepEqual(message, "Heroi cadastrado com sucesso");
   });
 });
