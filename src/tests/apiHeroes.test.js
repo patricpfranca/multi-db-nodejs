@@ -117,20 +117,71 @@ describe('Suite de testes da API Heroes', function () {
 
   it('atualizar PATCH /heroes/:id - não deve atualizar com id incorreto', async () => {
     const _id = `5cc10e46340171728d2e616c`;
-    const expected = {
-      poder: 'laço'
-    };
     
     const result = await app.inject({
       method: 'PATCH',
       url: `/heroes/${_id}`,
-      payload: JSON.stringify(expected)
+      payload: JSON.stringify({
+        poder: 'laço'
+      })
+    });
+
+    const statusCode = result.statusCode;
+    const dados = JSON.parse(result.payload);
+
+    const expected = { statusCode: 412,
+      error: 'Precondition Failed',
+      message: 'Id não encontrado no banco!' }    
+
+    assert.ok(statusCode === 412);
+    assert.deepEqual(dados, expected);
+  });
+
+  it('remover DELETE /heroes/:id', async () => {
+    const _id = MOCK_ID;
+    const result = await app.inject({
+      method: 'DELETE',
+      url: `/heroes/${_id}`
     });
 
     const statusCode = result.statusCode;
     const dados = JSON.parse(result.payload);
 
     assert.ok(statusCode === 200);
-    assert.deepEqual(dados.message, 'Não foi possivel atualizar!');
+    assert.deepEqual(dados.message, 'Heroi removido com sucesso');
+  });
+
+  it('remover DELETE /heroes/:id - não deve remover', async () => {
+    const _id = '5cc10e46340171728d2e616c';
+    const result = await app.inject({
+      method: 'DELETE',
+      url: `/heroes/${_id}`
+    });
+    const expected = { statusCode: 412,
+      error: 'Precondition Failed',
+      message: 'Id não encontrado no banco!' }
+
+    const statusCode = result.statusCode;
+    const dados = JSON.parse(result.payload);
+
+    assert.ok(statusCode === 412);
+    assert.deepEqual(dados, expected);
+  });
+
+  it('remover DELETE /heroes/:id - não deve remover com id invalido', async () => {
+    const _id = 'ID_INVALIDO';
+    const result = await app.inject({
+      method: 'DELETE',
+      url: `/heroes/${_id}`
+    });
+    const expected = { statusCode: 500,
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred' }
+
+    const statusCode = result.statusCode;
+    const dados = JSON.parse(result.payload);
+
+    assert.ok(statusCode === 500);
+    assert.deepEqual(dados, expected);
   });
 });
