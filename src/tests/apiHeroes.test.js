@@ -61,7 +61,14 @@ describe('Suite de testes da API Heroes', function () {
       url: `/heroes?skip=0&limit=${TAMANHO_LIMITE}`
     });
 
-    const errorResult = {"statusCode":400,"error":"Bad Request","message":"child \"limit\" fails because [\"limit\" must be a number]","validation":{"source":"query","keys":["limit"]}};
+    const errorResult = {
+      "statusCode":400,
+      "error":"Bad Request",
+      "message":"child \"limit\" fails because [\"limit\" must be a number]",
+      "validation":{
+        "source":"query","keys":["limit"]
+      }
+    };
 
     assert.deepEqual(result.statusCode, 400);
     assert.deepEqual(result.payload, JSON.stringify(errorResult));
