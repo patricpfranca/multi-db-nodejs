@@ -1,8 +1,5 @@
 const assert = require('assert');
 const api = require('./../api');
-const MongoDB = require('../db/strategies/mongodb/mongodb');
-const Context = require('../db/strategies/base/contextStrategy');
-const HeroesSchema = require('../db/strategies/mongodb/schemas/heroesSchema');
 
 let app = {};
 const MOCK_HEROES_CADASTRAR = {
@@ -13,9 +10,9 @@ const MOCK_HEROES_CADASTRAR = {
 const MOCK_HEROES_DEFAULT = {
   nome: 'Mulher Maravilha',
   poder: 'laço'
-}
+};
 
-let MOCK_ID = ''
+let MOCK_ID = '';
 
 describe('Suite de testes da API Heroes', function () {
   this.beforeAll(async () => {
@@ -102,12 +99,38 @@ describe('Suite de testes da API Heroes', function () {
   it('atualizar PATCH /heroes/:id', async () => {
     const _id = MOCK_ID;
     const expected = {
-      poder: 'laço'
+      poder: 'laço forte'
     };
+    
     const result = await app.inject({
       method: 'PATCH',
       url: `/heroes/${_id}`,
       payload: JSON.stringify(expected)
     });
+
+    const statusCode = result.statusCode;
+    const dados = JSON.parse(result.payload);
+
+    assert.ok(statusCode === 200);
+    assert.deepEqual(dados.message, 'Heroi atualizado com sucesso');
+  });
+
+  it('atualizar PATCH /heroes/:id - não deve atualizar com id incorreto', async () => {
+    const _id = `5cc10e46340171728d2e616c`;
+    const expected = {
+      poder: 'laço'
+    };
+    
+    const result = await app.inject({
+      method: 'PATCH',
+      url: `/heroes/${_id}`,
+      payload: JSON.stringify(expected)
+    });
+
+    const statusCode = result.statusCode;
+    const dados = JSON.parse(result.payload);
+
+    assert.ok(statusCode === 200);
+    assert.deepEqual(dados.message, 'Não foi possivel atualizar!');
   });
 });
