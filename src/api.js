@@ -11,7 +11,9 @@ const JWT_SECRET = 'meusegredao123';
 
 const Context = require('./db/strategies/base/contextStrategy');
 const MongoDB = require('./db/strategies/mongodb/mongodb');
+const PostgresDB = require('./db/strategies/postgres/postgres');
 const HeroesSchema = require('./db/strategies/mongodb/schemas/heroesSchema');
+const UserSchema = require('./db/strategies/postgres/schemas/userSchema');
 const HeroesRoute = require('./routes/heroesRoutes');
 const AuthRoute = require('./routes/authRoutes');
 
@@ -26,6 +28,10 @@ function mapRoutes(instance, methods) {
 async function main() {
   const connection = MongoDB.connect();
   const context = new Context(new MongoDB(connection, HeroesSchema));
+  const connectionPostgres = await PostgresDB.connect();
+  const model = await PostgresDB.defineModel(connectionPostgres, UserSchema);
+
+  const contextPostgres = new Context(new PostgresDB(connectionPostgres, model));
 
   const swaggerOptions = {
     info: {
@@ -46,7 +52,18 @@ async function main() {
     // options: {
     //   expiresIn: 20
     // },
-    validate: (dado, request) => {
+    validate: async (dado, request) => {
+      const [result] = await contextPostgres.read({
+        username: dado.username.toLowerCase(),
+        id: dado.id
+      });
+
+      if(!result) {
+        return {
+          isValid: false
+        }  
+      }
+
       return {
         isValid: true
       }
@@ -57,7 +74,7 @@ async function main() {
 
   app.route([
     ...mapRoutes(new HeroesRoute(context), HeroesRoute.methods()),
-    ...mapRoutes(new AuthRoute(JWT_SECRET), AuthRoute.methods())
+    ...mapRoutes(new AuthRoute(JWT_SECRET, contextPostgres), AuthRoute.methods())
   ]);
 
   await app.start();
