@@ -6,6 +6,10 @@ const failAction = (request, headers, error) => {
   throw error;
 };
 
+const headers = Joi.object({
+  authorization: Joi.string().required()
+}).unknown();
+
 class HeroesRoutes extends BaseRoute {
   constructor(db) {
     super();
@@ -26,7 +30,8 @@ class HeroesRoutes extends BaseRoute {
             skip: Joi.number().integer().default(0),
             limit: Joi.number().integer().default(10),
             nome: Joi.string().min(3).max(100)
-          }
+          },
+          headers
         }
       },
       handler: (request, headers) => {
@@ -53,6 +58,7 @@ class HeroesRoutes extends BaseRoute {
         notes: 'pode cadastrar heroi por nome e poder',
         validate: {
           failAction,
+          headers,
           payload: {
             nome: Joi.string().required().min(3).max(100),
             poder: Joi.string().required().min(2).max(100)
@@ -88,6 +94,7 @@ class HeroesRoutes extends BaseRoute {
           params: {
             id: Joi.string().required()
           },
+          headers,
           payload: {
             nome: Joi.string().min(3).max(100),
             poder: Joi.string().min(2).max(100)
@@ -127,6 +134,7 @@ class HeroesRoutes extends BaseRoute {
         notes: 'o id tem que ser valido',
         validate: {
           failAction,
+          headers,
           params: {
             id: Joi.string().required()
           }
