@@ -26,8 +26,10 @@ const MongoDB = require('./db/strategies/mongodb/mongodb');
 const PostgresDB = require('./db/strategies/postgres/postgres');
 const HeroesSchema = require('./db/strategies/mongodb/schemas/heroesSchema');
 const UserSchema = require('./db/strategies/postgres/schemas/userSchema');
+
 const HeroesRoute = require('./routes/heroesRoutes');
 const AuthRoute = require('./routes/authRoutes');
+const UtilRoute = require('./routes/utilRoutes');
 
 const app = new Hapi.Server({
   port: process.env.PORT
@@ -86,7 +88,8 @@ async function main() {
 
   app.route([
     ...mapRoutes(new HeroesRoute(context), HeroesRoute.methods()),
-    ...mapRoutes(new AuthRoute(JWT_SECRET, contextPostgres), AuthRoute.methods())
+    ...mapRoutes(new AuthRoute(JWT_SECRET, contextPostgres), AuthRoute.methods()),
+    ...mapRoutes(new UtilRoute(), UtilRoute.methods())
   ]);
 
   await app.start();
